@@ -24,7 +24,7 @@ def create_event(req):
         return jsonify({"error": f"Failed to create event: {str(e)}"}), 500
 
 
-def get_all_events():
+def get_all_events(req):
     events = Event.query.all()
     return jsonify({"message": "Events found", "events": events_schema.dump(events)}), 200
 
