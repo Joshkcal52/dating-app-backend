@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 import controllers
 
-event = Blueprint('events', __name__)
+event = Blueprint('event', __name__)
 
 
 @event.route('/event', methods=['POST'])
