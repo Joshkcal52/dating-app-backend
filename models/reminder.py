@@ -6,10 +6,10 @@ from db import db
 
 
 class Reminder(db.Model):
-    __tablename__ = "reminders"
+    __tablename__ = "Reminders"
 
     reminder_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    event_id = db.Column(UUID(as_uuid=True), db.ForeignKey("events.event_id", ondelete='CASCADE'), nullable=False)
+    event_id = db.Column(UUID(as_uuid=True), db.ForeignKey("Events.event_id", ondelete='CASCADE'), nullable=False)
     reminder_datetime = db.Column(db.DateTime(), nullable=False)
     reminder_type = db.Column(db.String(), nullable=False)
 

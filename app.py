@@ -1,11 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
-import psycopg2
 import os
 
 from db import *
 from util.blueprints import register_blueprints
-import routes
 
 
 flask_host = os.environ.get("FLASK_HOST")

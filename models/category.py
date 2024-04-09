@@ -6,7 +6,7 @@ from db import db
 
 
 class EventCategory(db.Model):
-    __tablename__ = "categories"
+    __tablename__ = "Categories"
 
     category_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     category_name = db.Column(db.String(), nullable=False)

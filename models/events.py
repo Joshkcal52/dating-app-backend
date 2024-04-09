@@ -6,14 +6,14 @@ from db import db
 
 
 class Event(db.Model):
-    __tablename__ = "events"
+    __tablename__ = "Events"
 
     event_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = db.Column(db.String(), nullable=False)
     description = db.Column(db.String())
     start_datetime = db.Column(db.DateTime(), nullable=False)
     end_datetime = db.Column(db.DateTime(), nullable=False)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.user_id", ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("Users.user_id", ondelete='CASCADE'), nullable=False)
 
     user = db.relationship("User", foreign_keys="[Event.user_id]", back_populates='events')
 
