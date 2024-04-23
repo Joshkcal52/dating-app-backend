@@ -5,22 +5,22 @@ from sqlalchemy.dialects.postgresql import UUID
 from db import db
 
 
-class EventCategory(db.Model):
-    __tablename__ = "Categories"
+class Category(db.Model):
+    __tablename__ = "Category"
 
-    category_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    category_name = db.Column(db.String(), nullable=False)
-    category_color = db.Column(db.String())
+    category_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True, nullable=False)
+    name = db.Column(db.String(), nullable=False)
+    color = db.Column(db.String(), nullable=False)
 
-    def __init__(self, category_name, category_color=None):
-        self.category_name = category_name
-        self.category_color = category_color
+    def __init__(self, name, color):
+        self.name = name
+        self.color = color
 
 
-class EventCategorySchema(ma.Schema):
+class CategorySchema(ma.Schema):
     class Meta:
-        fields = ['category_id', 'category_name', 'category_color']
+        fields = ['category_id', 'name', 'color']
 
 
-event_category_schema = EventCategorySchema()
-event_categories_schema = EventCategorySchema(many=True)
+category_schema = CategorySchema()
+categories_schema = CategorySchema(many=True)

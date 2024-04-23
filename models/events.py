@@ -5,31 +5,33 @@ from sqlalchemy.dialects.postgresql import UUID
 from db import db
 
 
-class Event(db.Model):
+class Events(db.Model):
     __tablename__ = "Events"
 
-    event_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = db.Column(UUID(as_uuid=True), default=uuid.uuid4, primary_key=True, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Users.user_id'), nullable=False)
     title = db.Column(db.String(), nullable=False)
-    description = db.Column(db.String())
-    start_datetime = db.Column(db.DateTime(), nullable=False)
-    end_datetime = db.Column(db.DateTime(), nullable=False)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("Users.user_id", ondelete='CASCADE'), nullable=False)
+    start_datetime = db.Column(db.String(), nullable=False)
+    end_datetime = db.Column(db.String(), nullable=False)
+    description = db.Column(db.String(), nullable=True)
+    category_id = db.Column(UUID(as_uuid=True), db.ForeignKey('Category.category_id'), nullable=True)
 
-    user = db.relationship("User", foreign_keys="[Event.user_id]", back_populates='events')
+    user = db.relationship("Users", back_populates="events")
+    category = db.relationship("Category")
 
-    def __init__(self, title, description, start_datetime, end_datetime, user_id):
+    def __init__(self, user_id, title, start_datetime, end_datetime, description=None, category_id=None):
+        self.user_id = user_id
         self.title = title
-        self.description = description
         self.start_datetime = start_datetime
         self.end_datetime = end_datetime
-        self.user_id = user_id
+        self.description = description
+        self.category_id = category_id
 
 
-class EventSchema(ma.Schema):
+class EventsSchema(ma.Schema):
     class Meta:
-        fields = ['event_id', 'title', 'description', 'start_datetime', 'end_datetime', 'user']
-    user = ma.fields.Nested('UserSchema', exclude=['events'])
+        fields = ['event_id', 'user_id', 'title', 'start_datetime', 'end_datetime', 'description', 'category_id']
 
 
-event_schema = EventSchema()
-events_schema = EventSchema(many=True)
+event_schema = EventsSchema()
+events_schema = EventsSchema(many=True)

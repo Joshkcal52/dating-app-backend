@@ -16,6 +16,8 @@ class Users(db.Model):
     active = db.Column(db.Boolean, default=True, nullable=False)
 
     auth = db.relationship("AuthTokens", back_populates="user")
+    contacts = db.relationship("Contacts", back_populates="user")
+    events = db.relationship("Events", back_populates="user")
 
     def __init__(self, first_name, last_name, email, password, role, active=True):
         self.first_name = first_name

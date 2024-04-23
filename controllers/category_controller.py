@@ -1,78 +1,98 @@
 from flask import jsonify, request
+
 from db import db
-from models.category import EventCategory, event_category_schema, event_categories_schema
+from models.category import Category, category_schema, categories_schema
+from util.reflections import populate_object
 
 
-def create_category(req):
-    category_name = request.json.get('category_name')
+def add_category(req):
+    req_data = request.form if request.form else request.get_json()
 
-    if not category_name:
-        return jsonify({"error": "Category name is required"}), 400
-
-    existing_category = EventCategory.query.filter_by(category_name=category_name).first()
-    if existing_category:
-        return jsonify({"error": "Category name already exists"}), 400
+    new_category = Category(**req_data)
 
     try:
-        new_category = EventCategory(category_name=category_name)
         db.session.add(new_category)
         db.session.commit()
-        return jsonify({"message": "Category added", "category": event_category_schema.dump(new_category)}), 201
+        return jsonify({"message": "Category created", "category": category_schema.dump(new_category)}), 201
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to create category: {str(e)}"}), 500
 
 
-def get_all_categories():
-    categories = EventCategory.query.all()
-    return jsonify({'message': 'Categories found', 'categories': event_categories_schema.dump(categories)}), 200
+def get_categories(req):
+    category_query = Category.query.all()
+
+    return jsonify({'message': 'Categories found', 'categories': categories_schema.dump(category_query)}), 200
 
 
-def get_category_by_id(category_id):
-    category = EventCategory.query.get(category_id)
+def get_category_by_id(req, category_id):
+    category_query = Category.query.get(category_id)
 
-    if category:
-        return jsonify({'category': event_category_schema.dump(category)}), 200
+    if not category_query:
+        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
 
-    return jsonify({'error': 'Category not found'}), 404
-
-
-def update_category(category_id):
-    data = request.json
-    category = EventCategory.query.get(category_id)
-
-    if category:
-        category_name = data.get('category_name')
-
-        if not category_name:
-            return jsonify({'error': 'Category name is required'}), 400
-
-        existing_category = EventCategory.query.filter(EventCategory.category_name == category_name, EventCategory.id != category_id).first()
-        if existing_category:
-            return jsonify({"error": "Category name already exists"}), 400
-
-        category.category_name = category_name
-
-        try:
-            db.session.commit()
-            return jsonify({'message': 'Category updated successfully', 'category': event_category_schema.dump(category)}), 200
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': f"Failed to update category: {str(e)}"}), 500
-    else:
-        return jsonify({'error': 'Category not found'}), 404
+    return jsonify({'message': 'Category found', 'category': category_schema.dump(category_query)}), 200
 
 
-def delete_category(category_id):
-    category = EventCategory.query.get(category_id)
+def activate_category(req, category_id):
+    category_query = Category.query.get(category_id)
 
-    if category:
-        try:
-            db.session.delete(category)
-            db.session.commit()
-            return jsonify({'message': 'Category deleted successfully'}), 200
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({'error': f"Failed to delete category: {str(e)}"}), 500
+    if not category_query:
+        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
 
-    return jsonify({'error': 'Category not found'}), 404
+    category_query.active = True
+
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Category activated successfully', 'category': category_schema.dump(category_query)}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f"Failed to activate category: {str(e)}"}), 500
+
+
+def deactivate_category(req, category_id):
+    category_query = Category.query.get(category_id)
+
+    if not category_query:
+        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+
+    category_query.active = False
+
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Category deactivated successfully', 'category': category_schema.dump(category_query)}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f"Failed to deactivate category: {str(e)}"}), 500
+
+
+def update_category(req, category_id):
+    post_data = request.json
+    category_query = Category.query.get(category_id)
+
+    if not category_query:
+        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+
+    populate_object(category_query, post_data)
+
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Category updated successfully', 'category': category_schema.dump(category_query)}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f"Failed to update category: {str(e)}"}), 500
+
+
+def delete_category(req, category_id):
+    category_query = Category.query.get(category_id)
+
+    if not category_query:
+        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+
+    try:
+        db.session.delete(category_query)
+        db.session.commit()
+        return jsonify({'message': 'Category deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f"Failed to delete category: {str(e)}"}), 500
