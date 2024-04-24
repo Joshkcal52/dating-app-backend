@@ -14,9 +14,9 @@ def add_contact(req):
         db.session.add(new_contact)
         db.session.commit()
         return jsonify({"message": "Contact created", "contact": contact_schema.dump(new_contact)}), 201
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({"error": f"Failed to create contact: {str(e)}"}), 500
+        return jsonify({"message": "Failed to create contact"}), 500
 
 
 def get_contacts(req):
@@ -29,9 +29,22 @@ def get_contact_by_id(req, contact_id):
     contact_query = Contacts.query.get(contact_id)
 
     if not contact_query:
-        return jsonify({"error": f"Contact with ID {contact_id} not found"}), 404
+        return jsonify({"message": "Contact not found"}), 404
 
     return jsonify({'message': 'Contact found', 'contact': contact_schema.dump(contact_query)}), 200
+
+
+def contact_status(contact_id):
+    try:
+        contact = db.session.query(Contacts).filter(Contacts.contact_id == contact_id).first()
+        if contact:
+            contact.active = not contact.active
+            db.session.commit()
+            return jsonify({'message': 'Contact status updated successfully', 'result': contact_schema.dump(contact)}), 200
+        return jsonify({'message': 'Contact not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Unable to update contact status', 'error': str(e)}), 400
 
 
 def update_contact(req, contact_id):
@@ -39,28 +52,28 @@ def update_contact(req, contact_id):
     contact_query = Contacts.query.get(contact_id)
 
     if not contact_query:
-        return jsonify({"error": f"Contact with ID {contact_id} not found"}), 404
+        return jsonify({"message": "Contact not found"}), 404
 
     populate_object(contact_query, post_data)
 
     try:
         db.session.commit()
         return jsonify({'message': 'Contact updated successfully', 'contact': contact_schema.dump(contact_query)}), 200
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({'error': f"Failed to update contact: {str(e)}"}), 500
+        return jsonify({'message': "Failed to update contact"}), 500
 
 
 def delete_contact(req, contact_id):
     contact_query = Contacts.query.get(contact_id)
 
     if not contact_query:
-        return jsonify({"error": f"Contact with ID {contact_id} not found"}), 404
+        return jsonify({"message": "Contact not found"}), 404
 
     try:
         db.session.delete(contact_query)
         db.session.commit()
         return jsonify({'message': 'Contact deleted successfully'}), 200
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({'error': f"Failed to delete contact: {str(e)}"}), 500
+        return jsonify({'message': "Failed to delete contact"}), 500

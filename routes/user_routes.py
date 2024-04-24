@@ -15,19 +15,14 @@ def get_users():
     return controllers.get_users(request)
 
 
+@users.route('/user/status/<id>', methods=['PUT'])
+def user_status(id):
+    return controllers.user_status(request, id)
+
+
 @users.route('/user/<id>', methods=['PUT'])
 def update_user(id):
     return controllers.update_user(request, id)
-
-
-@users.route('/user/activate/<id>', methods=['PUT'])
-def activate_user(id):
-    return controllers.activate_user(request, id)
-
-
-@users.route('/user/deactivate/<id>', methods=['PUT'])
-def deactivate_user(id):
-    return controllers.deactivate_user(request, id)
 
 
 @users.route('/user/delete/<id>', methods=['DELETE'])

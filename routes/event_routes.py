@@ -14,9 +14,9 @@ def get_events():
     return controllers.get_events(request)
 
 
-# @event.route('/event/<id>', methods=['GET'])
-# def get_event_by_id(id):
-#     return controllers.get_event_by_id(id)
+@event.route('/event/status/<id>', methods=['PUT'])
+def event_status(id):
+    return controllers.event_status(request, id)
 
 
 @event.route('/event/<id>', methods=['PUT'])

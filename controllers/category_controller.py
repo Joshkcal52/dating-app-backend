@@ -14,9 +14,9 @@ def add_category(req):
         db.session.add(new_category)
         db.session.commit()
         return jsonify({"message": "Category created", "category": category_schema.dump(new_category)}), 201
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({"error": f"Failed to create category: {str(e)}"}), 500
+        return jsonify({"message": "Failed to create category"}), 500
 
 
 def get_categories(req):
@@ -29,7 +29,7 @@ def get_category_by_id(req, category_id):
     category_query = Category.query.get(category_id)
 
     if not category_query:
-        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+        return jsonify({"message": "Category not found"}), 404
 
     return jsonify({'message': 'Category found', 'category': category_schema.dump(category_query)}), 200
 
@@ -38,32 +38,32 @@ def activate_category(req, category_id):
     category_query = Category.query.get(category_id)
 
     if not category_query:
-        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+        return jsonify({"message": "Category not found"}), 404
 
     category_query.active = True
 
     try:
         db.session.commit()
         return jsonify({'message': 'Category activated successfully', 'category': category_schema.dump(category_query)}), 200
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({'error': f"Failed to activate category: {str(e)}"}), 500
+        return jsonify({'message': "Failed to activate category"}), 500
 
 
 def deactivate_category(req, category_id):
     category_query = Category.query.get(category_id)
 
     if not category_query:
-        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+        return jsonify({"message": "Category not found"}), 404
 
     category_query.active = False
 
     try:
         db.session.commit()
         return jsonify({'message': 'Category deactivated successfully', 'category': category_schema.dump(category_query)}), 200
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({'error': f"Failed to deactivate category: {str(e)}"}), 500
+        return jsonify({'message': "Failed to deactivate category"}), 500
 
 
 def update_category(req, category_id):
@@ -71,28 +71,28 @@ def update_category(req, category_id):
     category_query = Category.query.get(category_id)
 
     if not category_query:
-        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+        return jsonify({"message": "Category not found"}), 404
 
     populate_object(category_query, post_data)
 
     try:
         db.session.commit()
         return jsonify({'message': 'Category updated successfully', 'category': category_schema.dump(category_query)}), 200
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({'error': f"Failed to update category: {str(e)}"}), 500
+        return jsonify({'message': "Failed to update category"}), 500
 
 
 def delete_category(req, category_id):
     category_query = Category.query.get(category_id)
 
     if not category_query:
-        return jsonify({"error": f"Category with ID {category_id} not found"}), 404
+        return jsonify({"message": "Category not found"}), 404
 
     try:
         db.session.delete(category_query)
         db.session.commit()
         return jsonify({'message': 'Category deleted successfully'}), 200
-    except Exception as e:
+    except:
         db.session.rollback()
-        return jsonify({'error': f"Failed to delete category: {str(e)}"}), 500
+        return jsonify({'message': "Failed to delete category"}), 500

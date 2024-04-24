@@ -34,6 +34,20 @@ def get_users(req):
 
 
 @auth_admin
+def user_status(user_id):
+    try:
+        user = db.session.query(Users).filter(Users.user_id == user_id).first()
+        if user:
+            user.active = not user.active
+            db.session.commit()
+            return jsonify({'message': 'user status updated successfully', 'result': user_schema.dump(user)}), 200
+        return jsonify({'message': 'user not found'}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'unable to update user status', 'error': str(e)}), 400
+
+
+@auth_admin
 def update_user(req, user_id):
     post_data = req.form if req.form else req.json
     user_query = db.session.query(Users).filter(Users.user_id == user_id).first()
@@ -47,42 +61,6 @@ def update_user(req, user_id):
         return jsonify({'message': 'user could not be updated'}), 400
 
     return jsonify({'message': 'user updated', 'result': user_schema.dump(user_query)}), 200
-
-
-@auth_admin
-def activate_user(req, user_id):
-    user_query = db.session.query(Users).filter(Users.user_id == user_id).first()
-
-    if not user_query:
-        return jsonify({"message": f"user by id {user_id} does not exist"}), 400
-
-    user_query.active = True
-
-    try:
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({"message": "unable to activate user"}), 400
-
-    return jsonify({"message": "user has been activated"}), 200
-
-
-@auth_admin
-def deactivate_user(req, user_id):
-    user_query = db.session.query(Users).filter(Users.user_id == user_id).first()
-
-    if not user_query:
-        return jsonify({"message": f"user by id {user_id} does not exist"}), 400
-
-    user_query.active = False
-
-    try:
-        db.session.commit()
-    except:
-        db.session.rollback()
-        return jsonify({"message": "unable to deactivate user"}), 400
-
-    return jsonify({"message": "user has been deactivated"}), 200
 
 
 @auth_admin

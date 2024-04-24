@@ -24,6 +24,21 @@ def get_socials(req):
 
     return jsonify({'message': 'Social profiles found', 'socials': socials_schema.dump(social_query)}), 200
 
+def social_status(req, social_id):
+    social_query = Socials.query.get(social_id)
+
+    if not social_query:
+        return jsonify({"message": "Social profile not found"}), 404
+
+    social_query.active = not social_query.active
+
+    try:
+        db.session.commit()
+        return jsonify({'message': 'Social profile status toggled successfully', 'social': social_schema.dump(social_query)}), 200
+    except:
+        db.session.rollback()
+        return jsonify({'message': "Failed to toggle social profile status"}), 400
+
 
 def update_social(req, social_id):
     post_data = request.json
